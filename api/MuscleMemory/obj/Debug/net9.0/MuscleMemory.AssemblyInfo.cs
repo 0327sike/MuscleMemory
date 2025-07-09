@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MuscleMemory")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+24f043762c03d9cbd92e6282ed70a4f458e6d6db")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e23b238413c87042f3b2c35df3a97448626f61e7")]
 [assembly: System.Reflection.AssemblyProductAttribute("MuscleMemory")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MuscleMemory")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
