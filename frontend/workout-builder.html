@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Builder - Muscle Memory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9Oer-2iRpZ8sBKMf/h/A0oI5Q5e0t2jP6A7oB5C5T5w" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Custom styles for workout builder buttons and dropdowns */
+        .muscle-group-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Adjusted min-width for Bootstrap context */
+            gap: 20px; /* Reduced gap slightly */
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px; /* Space from search bar/filters */
+            margin-bottom: 30px;
+        }
+
+        .dropdown-container {
+            position: relative;
+            display: flex; /* Ensures button is centered within its grid cell */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .workout-button {
+            background-color: #007bff; /* Primary blue for default */
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+            height: 60px; /* Standard height */
+            width: 100%;
+            max-width: 200px; /* Max width for individual buttons */
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .workout-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Specific button colors for visual distinction (retained) */
+        #chest-btn { background-color: #28a745; } /* Green */
+        #chest-btn:hover { background-color: #218838; }
+
+        #back-btn { background-color: #ffc107; color: #333; } /* Yellow, darker text */
+        #back-btn:hover { background-color: #e0a800; }
+
+        #shoulders-btn { background-color: #17a2b8; } /* Teal */
+        #shoulders-btn:hover { background-color: #138496; }
+
+        #arms-btn { background-color: #6f42c1; } /* Purple */
+        #arms-btn:hover { background-color: #5a2eac; }
+
+        #legs-btn { background-color: #dc3545; } /* Red */
+        #legs-btn:hover { background-color: #c82333; }
+
+        #abs-btn { background-color: #6c757d; } /* Grey */
+        #abs-btn:hover { background-color: #5a6268; }
+
+        /* Dropdown content styling */
+        .dropdown-content {
+            display: none; /* Hidden by default */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 220px; /* Adjusted min-width for dropdown */
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1050; /* Higher z-index to appear above Bootstrap elements like modals if any */
+            border-radius: 6px;
+            padding: 8px 0;
+            top: calc(100% + 10px); /* Position below the button + some space */
+            left: 50%;
+            transform: translateX(-50%);
+            max-height: 250px; /* Limit height for scroll if many items */
+            overflow-y: auto; /* Enable scrolling */
+            border: 1px solid #ddd;
+        }
+
+        .dropdown-content.show {
+            display: block; /* Show when 'show' class is added by JS */
+        }
+
+        .dropdown-content .workout-item-select {
+            display: flex; /* Arrange workout name and select side-by-side */
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px; /* Smaller padding for dropdown items */
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
+            white-space: nowrap; /* Prevent text wrapping */
+            font-size: 0.9em; /* Smaller font for dropdown items */
+        }
+
+        .dropdown-content .workout-item-select:hover {
+             background-color: #e9ecef;
+             color: #007bff;
+        }
+
+        .dropdown-content .workout-item-select .workout-name {
+            flex-grow: 1; /* Allow workout name to take space */
+            margin-right: 10px; /* Space between name and select */
+        }
+
+        .dropdown-content .workout-item-select .form-select {
+            width: auto; /* Allow select to shrink to content */
+            padding: .25rem .75rem; /* Bootstrap small select padding */
+            font-size: .8em;
+            height: auto; /* Auto height */
+            max-width: 90px; /* Limit width of select */
+        }
+
+
+        /* Adjustments for the existing layout */
+        #wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        #sidebar-wrapper {
+            min-height: 100vh;
+            margin-left: -15rem; /* Hidden by default on small screens */
+            transition: margin .25s ease-out;
+        }
+
+        #page-content-wrapper {
+            min-width: 0;
+            width: 100%;
+        }
+
+        /* Toggle state for sidebar */
+        body.sb-sidenav-toggled #sidebar-wrapper {
+            margin-left: 0;
+        }
+
+        @media (min-width: 992px) {
+            #sidebar-wrapper {
+                margin-left: 0;
+            }
+            #page-content-wrapper {
+                min-width: 0;
+                width: 100%;
+            }
+            body.sb-sidenav-toggled #sidebar-wrapper {
+                margin-left: -15rem;
+            }
+        }
+
+        /* Specific styles for the "Your Current Plan" section */
+        .min-height-200 {
+            min-height: 200px; /* Ensure boxes have minimum height */
+        }
+        .draggable-list li {
+            cursor: grab; /* Indicate draggable */
+        }
+        .shadow-sm-light {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        #fixed-signin-button {
+            position: fixed;
+            top: 20px; /* Adjust as needed */
+            right: 20px; /* Adjust as needed */
+            z-index: 1060; /* Higher than other elements, including dropdowns */
+        }
+        .loading-message, .error-message, .no-results-message {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="fixed-signin-button">
+        <button class="btn btn-primary">Sign In</button>
+    </div>
+
+    <div class="d-flex" id="wrapper">
+        <aside class="bg-white border-end" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light py-4 ps-4">
+                <h1 class="h5 d-inline-block align-middle mb-0">Muscle Memory</h1>
+            </div>
+            <nav class="list-group list-group-flush">
+                <a href="/dashboard.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-home me-2"></i> Dashboard
+                </a>
+                <a href="/index.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-dumbbell me-2"></i> Exercise Library
+                </a>
+                <a href="/workout-builder.html" class="list-group-item list-group-item-action bg-light p-3 active">
+                    <i class="fas fa-edit me-2"></i> Workout Builder
+                </a>
+                <a href="/my-schedule.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-calendar-alt me-2"></i> My Schedule
+                </a>
+                <a href="/progress-track.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-chart-line me-2"></i> Progress Track
+                </a>
+                <a href="/education-hub.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-book me-2"></i> Education Hub
+                </a>
+                <a href="/clients.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-users me-2"></i> Clients <span class="badge bg-primary rounded-pill ms-auto">5</span>
+                </a>
+                <a href="/settings.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-cog me-2"></i> Settings
+                </a>
+            </nav>
+        </aside>
+
+        <main id="page-content-wrapper" class="flex-grow-1">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary d-lg-none" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+                    </div>
+            </nav>
+
+            <div class="container-fluid py-4">
+                <h2 class="mb-4">Build Your New Workout Plan</h2>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">Add Exercises</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="workoutBuilderSearch" placeholder="Search exercises in library..." aria-label="Search exercises">
+                            <button class="btn btn-primary" type="button" id="workoutBuilderSearchBtn"><i class="fas fa-search"></i></button>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select" id="workoutBuilderMuscleFilter">
+                                    <option value="">All Muscle Groups</option>
+                                    <option value="Chest">Chest</option>
+                                    <option value="Back">Back</option>
+                                    <option value="Legs">Legs</option>
+                                    <option value="Arms">Arms</option>
+                                    <option value="Shoulders">Shoulders</option>
+                                    <option value="Core">Core</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="workoutBuilderEquipmentFilter">
+                                    <option value="">All Equipment</option>
+                                    <option value="Dumbbells">Dumbbells</option>
+                                    <option value="Barbell">Barbell</option>
+                                    <option value="Bodyweight">Bodyweight</option>
+                                    <option value="Resistance Bands">Resistance Bands</option>
+                                    <option value="Cables">Cables</option>
+                                    <option value="Machine">Machine</option>
+                                    <option value="Equipment">Other Equipment</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="workoutBuilderDifficultyFilter">
+                                    <option selected>All Difficulties</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="muscle-group-grid" id="muscleGroupButtonsContainer">
+                            <div class="loading-message col-12"><i class="fas fa-spinner fa-pulse me-2"></i> Loading exercises...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">Your Current Plan: <span class="text-primary" id="currentPlanName">Full Body Beginner</span></h3>
+                        <p class="card-text text-muted">Drag and drop exercises here to build your daily routine.</p>
+
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div class="p-4 border rounded bg-light min-height-200">
+                                    <h5 class="mb-3">Day 1: Full Body Strength</h5>
+                                    <ul class="list-group list-group-flush draggable-list" id="day1-workout-list">
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="p-4 border rounded bg-light min-height-200">
+                                    <h5 class="mb-3">Day 2: Rest / Active Recovery</h5>
+                                    <ul class="list-group list-group-flush draggable-list" id="day2-workout-list">
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="p-4 border rounded bg-light min-height-200">
+                                    <h5 class="mb-3">Day 3: Upper Body Focus</h5>
+                                    <ul class="list-group list-group-flush draggable-list" id="day3-workout-list">
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="p-4 border rounded bg-light min-height-200">
+                                    <h5 class="mb-3">Day 4: Lower Body & Core</h5>
+                                    <ul class="list-group list-group-flush draggable-list" id="day4-workout-list">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button class="btn btn-success me-2" id="finalizePlanBtn"><i class="fas fa-check-circle me-2"></i> Finalize Plan</button>
+                            <button class="btn btn-outline-danger" id="clearPlanBtn"><i class="fas fa-trash-alt me-2"></i> Clear Plan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="text-center text-muted small py-4 mt-5 border-top">
+                    &copy; 2025 Muscle Memory. All rights reserved.
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Mock User ID for testing (replace with actual user ID from login once implemented)
+            const MOCK_USER_ID = 'b7c01cad-b01b-4384-b600-169ef919a2b9'; // <<< MUST REPLACE THIS
+
+            if (MOCK_USER_ID === 'YOUR_ACTUAL_TEST_USER_ID_FROM_DB') {
+                alert("CRITICAL: Please update workout-builder.html with a valid MOCK_USER_ID from your database. Check console for details.");
+                console.error("MOCK_USER_ID not set in workout-builder.html. Workout plan saving will not work correctly.");
+                // Prevent further execution of data-dependent functions
+            }
+
+            const dropdownButtons = document.querySelectorAll('.workout-button');
+            const muscleGroupButtonsContainer = document.getElementById('muscleGroupButtonsContainer');
+
+            // Get references to all day lists
+            const dayWorkoutLists = {
+                day1: document.getElementById('day1-workout-list'),
+                day2: document.getElementById('day2-workout-list'),
+                day3: document.getElementById('day3-workout-list'),
+                day4: document.getElementById('day4-workout-list'),
+            };
+
+            // Search/Filter elements for workout builder
+            const workoutBuilderSearch = document.getElementById('workoutBuilderSearch');
+            const workoutBuilderSearchBtn = document.getElementById('workoutBuilderSearchBtn');
+            const workoutBuilderMuscleFilter = document.getElementById('workoutBuilderMuscleFilter');
+            const workoutBuilderEquipmentFilter = document.getElementById('workoutBuilderEquipmentFilter');
+            const workoutBuilderDifficultyFilter = document.getElementById('workoutBuilderDifficultyFilter');
+
+            // --- Function to ensure "No workouts added yet" message for each day ---
+            function ensureNoWorkoutsMessage(list) {
+                const messageId = list.id.replace('-workout-list', '-no-workouts-message');
+                let existingMessage = list.querySelector(`#${messageId}`);
+
+                // Filter out the "no workouts" message itself before checking children length
+                const currentWorkoutItems = Array.from(list.children).filter(item => !item.id || !item.id.includes('-no-workouts-message'));
+
+                if (currentWorkoutItems.length === 0) {
+                    if (!existingMessage) {
+                        const initialNoWorkoutsMessage = document.createElement('li');
+                        initialNoWorkoutsMessage.id = messageId;
+                        initialNoWorkoutsMessage.classList.add('list-group-item', 'text-muted');
+                        initialNoWorkoutsMessage.textContent = 'No workouts added yet.';
+                        list.appendChild(initialNoWorkoutsMessage);
+                    }
+                } else if (existingMessage) {
+                    existingMessage.remove(); // Remove message if items exist
+                }
+            }
+
+            // Initial setup for "No workouts added yet" message for each day
+            Object.values(dayWorkoutLists).forEach(ensureNoWorkoutsMessage);
+
+
+            // --- Sidebar Toggle Logic ---
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', event => {
+                    event.preventDefault();
+                    document.body.classList.toggle('sb-sidenav-toggled');
+                });
+            }
+
+            // --- Dynamic Dropdown Population ---
+            let allExercises = []; // Store all exercises once fetched
+
+            async function fetchAndPopulateMuscleGroupDropdowns(searchQuery = '', muscleFilter = '', equipmentFilter = '', difficultyFilter = '') {
+                muscleGroupButtonsContainer.innerHTML = '<div class="loading-message col-12"><i class="fas fa-spinner fa-pulse me-2"></i> Loading exercises for builder...</div>';
+
+                try {
+                    let url = `http://localhost:3000/api/exercises?limit=1000`; // Fetch many exercises for categorization
+                    if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+                    if (muscleFilter) url += `&muscle_group=${encodeURIComponent(muscleFilter)}`;
+                    if (equipmentFilter) url += `&equipment=${encodeURIComponent(equipmentFilter)}`;
+                    if (difficultyFilter) url += `&difficulty=${encodeURIComponent(difficultyFilter)}`;
+
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    allExercises = data.exercises || []; // Store fetched exercises
+
+                    const muscleGroups = [ // Define the order of muscle group buttons
+                        { id: 'chest-btn', name: 'Chest', key: 'Chest', color: '#28a745' },
+                        { id: 'back-btn', name: 'Back', key: 'Back', color: '#ffc107', textColor: '#333' },
+                        { id: 'shoulders-btn', name: 'Shoulders', key: 'Shoulders', color: '#17a2b8' },
+                        { id: 'arms-btn', name: 'Arms', key: 'Arms', color: '#6f42c1' },
+                        { id: 'legs-btn', name: 'Legs', key: 'Legs', color: '#dc3545' },
+                        { id: 'abs-btn', name: 'Core', key: 'Core', color: '#6c757d' }
+                    ];
+
+                    muscleGroupButtonsContainer.innerHTML = ''; // Clear loading message
+
+                    if (allExercises.length === 0) {
+                        muscleGroupButtonsContainer.innerHTML = '<div class="no-results-message col-12">No exercises found for builder with current filters.</div>';
+                        return;
+                    }
+
+                    const groupedExercises = allExercises.reduce((acc, exercise) => {
+                        acc[exercise.muscle_group] = acc[exercise.muscle_group] || [];
+                        acc[exercise.muscle_group].push(exercise);
+                        return acc;
+                    }, {});
+
+                    muscleGroups.forEach(group => {
+                        const dropdownContainer = document.createElement('div');
+                        dropdownContainer.classList.add('dropdown-container');
+
+                        // Create button
+                        const button = document.createElement('button');
+                        button.classList.add('workout-button');
+                        button.id = group.id;
+                        button.textContent = group.name;
+                        button.style.backgroundColor = group.color;
+                        if (group.textColor) button.style.color = group.textColor;
+                        button.style.borderColor = group.color; // Ensure border matches background for consistency
+
+                        // Create dropdown content
+                        const dropdownContent = document.createElement('div');
+                        dropdownContent.classList.add('dropdown-content');
+
+                        const exercisesForGroup = groupedExercises[group.key] || [];
+                        if (exercisesForGroup.length === 0) {
+                            dropdownContent.innerHTML = '<div style="padding: 10px 15px; color: #888;">No exercises for this group found.</div>';
+                        } else {
+                            exercisesForGroup.sort((a, b) => a.name.localeCompare(b.name)); // Sort exercises alphabetically
+                            exercisesForGroup.forEach(exercise => {
+                                const workoutItemSelect = document.createElement('div');
+                                workoutItemSelect.classList.add('workout-item-select');
+                                workoutItemSelect.innerHTML = `
+                                    <span class="workout-name" data-workout="${exercise.name}">${exercise.name}</span>
+                                    <select class="form-select form-select-sm add-to-day">
+                                        <option value="">Add to Day</option>
+                                        <option value="day1">Day 1</option>
+                                        <option value="day2">Day 2</option>
+                                        <option value="day3">Day 3</option>
+                                        <option value="day4">Day 4</option>
+                                    </select>
+                                `;
+                                dropdownContent.appendChild(workoutItemSelect);
+                            });
+                        }
+
+                        dropdownContainer.appendChild(button);
+                        dropdownContainer.appendChild(dropdownContent);
+                        muscleGroupButtonsContainer.appendChild(dropdownContainer);
+                    });
+
+                    // Re-attach dropdown toggle listeners to newly created buttons
+                    attachDropdownToggleListeners();
+                    // Re-attach add-to-day change listeners to newly created selects
+                    attachAddToDayListeners();
+
+                } catch (error) {
+                    console.error('Error fetching exercises for workout builder:', error);
+                    muscleGroupButtonsContainer.innerHTML = `<div class="error-message col-12"><i class="fas fa-exclamation-triangle me-2"></i> Error loading exercises: ${error.message}. Please ensure backend is running.</div>`;
+                }
+            }
+
+            // Debounce function (re-defined here for clarity, assuming it's not global)
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    const context = this;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(context, args), delay);
+                };
+            }
+
+            // Attach dropdown toggle listeners (now a separate function)
+            function attachDropdownToggleListeners() {
+                document.querySelectorAll('.workout-button').forEach(button => {
+                    button.removeEventListener('click', handleDropdownToggle); // Prevent duplicate listeners
+                    button.addEventListener('click', handleDropdownToggle);
+                });
+            }
+
+            function handleDropdownToggle() {
+                const dropdownContent = this.nextElementSibling;
+                document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
+                    if (openDropdown !== dropdownContent) {
+                        openDropdown.classList.remove('show');
+                    }
+                });
+                dropdownContent.classList.toggle('show');
+            }
+
+            // Attach add-to-day listeners (now a separate function)
+            function attachAddToDayListeners() {
+                document.querySelectorAll('.dropdown-content .add-to-day').forEach(selectElement => {
+                    selectElement.removeEventListener('change', handleAddToDayChange); // Prevent duplicate listeners
+                    selectElement.addEventListener('change', handleAddToDayChange);
+                });
+            }
+
+            async function handleAddToDayChange(event) {
+                const selectedDay = this.value;
+                const workoutName = this.closest('.workout-item-select').querySelector('.workout-name').dataset.workout;
+                const workoutDetails = `${workoutName} (3 sets x 8-12 reps)`;
+
+                if (!selectedDay) return;
+
+                const targetList = dayWorkoutLists[selectedDay];
+                if (!targetList) { console.error(`Error: Could not find workout list for day: ${selectedDay}`); return; }
+
+                const existingWorkoutNames = Array.from(targetList.children)
+                    .map(li => li.querySelector('span')?.textContent.replace(/\s*\(.*\)\s*$/, '').trim())
+                    .filter(name => name);
+
+                if (existingWorkoutNames.includes(workoutName)) {
+                    alert(`"${workoutName}" is already in ${selectedDay.replace('day', 'Day ')}'s workout plan!`);
+                    this.value = '';
+                    return;
+                }
+
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'bg-white', 'shadow-sm-light', 'mb-2', 'p-3', 'rounded');
+                listItem.innerHTML = `
+                    <span>${workoutDetails}</span>
+                    <i class="fas fa-times-circle text-danger ms-auto cursor-pointer"></i>
+                `;
+
+                const removeButton = listItem.querySelector('.fas.fa-times-circle');
+                removeButton.addEventListener('click', function() {
+                    const parentList = this.closest('.draggable-list');
+                    listItem.remove();
+                    ensureNoWorkoutsMessage(parentList);
+                });
+
+                targetList.appendChild(listItem);
+                ensureNoWorkoutsMessage(targetList);
+                this.value = '';
+            }
+
+            // --- Event Listeners for Search and Filter ---
+            const debouncedFetchBuilderExercises = debounce(() => {
+                fetchAndPopulateMuscleGroupDropdowns(
+                    workoutBuilderSearch.value,
+                    workoutBuilderMuscleFilter.value,
+                    workoutBuilderEquipmentFilter.value,
+                    workoutBuilderDifficultyFilter.value
+                );
+            }, 300);
+
+            workoutBuilderSearch.addEventListener('input', debouncedFetchBuilderExercises);
+            workoutBuilderSearchBtn.addEventListener('click', debouncedFetchBuilderExercises); // Also trigger on button click
+            workoutBuilderMuscleFilter.addEventListener('change', debouncedFetchBuilderExercises);
+            workoutBuilderEquipmentFilter.addEventListener('change', debouncedFetchBuilderExercises);
+            workoutBuilderDifficultyFilter.addEventListener('change', debouncedFetchBuilderExercises);
+
+
+            // --- Finalize Plan Button (Connects to backend!) ---
+            const finalizePlanBtn = document.getElementById('finalizePlanBtn');
+            if (finalizePlanBtn) {
+                finalizePlanBtn.addEventListener('click', async (event) => {
+                    event.preventDefault();
+
+                    if (MOCK_USER_ID === 'YOUR_ACTUAL_TEST_USER_ID_FROM_DB') {
+                        alert("Error: MOCK_USER_ID is not configured. Cannot finalize plan. Please check console.");
+                        return;
+                    }
+
+                    const planName = document.getElementById('currentPlanName').textContent;
+                    const workoutDaysData = {};
+                    for (const dayKey in dayWorkoutLists) {
+                        const list = dayWorkoutLists[dayKey];
+                        const exercises = Array.from(list.children)
+                            .filter(li => !li.id || !li.id.includes('-no-workouts-message'))
+                            .map(li => li.querySelector('span')?.textContent.trim())
+                            .filter(workout => workout);
+                        workoutDaysData[dayKey] = exercises;
+                    }
+
+                    const totalWorkouts = Object.values(workoutDaysData).flat().length;
+                    if (totalWorkouts === 0) {
+                        alert('Your workout plan is empty! Please add some exercises before finalizing.');
+                        return;
+                    }
+
+                    const workoutPlanPayload = {
+                        planName: planName,
+                        days: workoutDaysData,
+                        userId: MOCK_USER_ID // Pass the user ID for the backend
+                    };
+
+                    try {
+                        const response = await fetch('http://localhost:3000/api/workout-plans', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                // 'Authorization': `Bearer YOUR_AUTH_TOKEN` // Re-enable for production
+                            },
+                            body: JSON.stringify(workoutPlanPayload)
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(result.message || 'Failed to save workout plan.');
+                        }
+
+                        alert(`Workout plan "${planName}" finalized and saved! ID: ${result.planId}`);
+                        console.log('Saved plan:', result.plan);
+                        // Optional: Clear the builder after successful save
+                        // clearPlanBtn.click();
+                        // Optional: Redirect to schedule page
+                        // window.location.href = `/my-schedule.html`;
+
+                    } catch (error) {
+                        console.error('Error finalizing workout plan:', error);
+                        alert(`Error finalizing plan: ${error.message}. Please ensure backend is running and check console.`);
+                    }
+                });
+            }
+
+            // --- Clear Plan Button Functionality ---
+            const clearPlanBtn = document.getElementById('clearPlanBtn');
+            if (clearPlanBtn) {
+                clearPlanBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (confirm('Are you sure you want to clear the entire workout plan for all days? This cannot be undone.')) {
+                        Object.values(dayWorkoutLists).forEach(list => {
+                            while (list.firstChild) {
+                                list.removeChild(list.firstChild);
+                            }
+                            ensureNoWorkoutsMessage(list);
+                        });
+                        alert('Workout plan cleared for all days!');
+                    }
+                });
+            }
+
+            // --- Initial Load of Exercises for Builder ---
+            fetchAndPopulateMuscleGroupDropdowns();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Library - Muscle Memory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9Oer-2iRpZ8sBKMf/h/A0oI5Q5e0t2jP6A7oB5C5T5w" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"> 
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Adjustments for the existing layout (from previous updates) */
+        #wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        #sidebar-wrapper {
+            min-height: 100vh;
+            margin-left: -15rem; /* Hidden by default on small screens */
+            transition: margin .25s ease-out;
+        }
+
+        #page-content-wrapper {
+            min-width: 0;
+            width: 100%;
+        }
+
+        /* Toggle state for sidebar */
+        body.sb-sidenav-toggled #sidebar-wrapper {
+            margin-left: 0;
+        }
+
+        @media (min-width: 992px) {
+            #sidebar-wrapper {
+                margin-left: 0;
+            }
+            #page-content-wrapper {
+                min-width: 0;
+                width: 100%;
+            }
+            body.sb-sidenav-toggled #sidebar-wrapper {
+                margin-left: -15rem;
+            }
+        }
+
+        #fixed-signin-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+        }
+
+        .sidebar-heading h1 {
+            color: #2c3e50;
+        }
+
+        .list-group-item.active {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+            color: white !important;
+        }
+        .list-group-item.active i {
+            color: white !important;
+        }
+
+        /* Exercise Library Specific Styles */
+        .exercise-item {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .exercise-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15) !important;
+        }
+        .exercise-item img {
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .exercise-list-container {
+            max-height: 600px; /* Limit height and make it scrollable */
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fff;
+        }
+        .no-exercises-message, .loading-message, .error-message {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .loading-message i {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        .pagination-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* Style for current page number button */
+        .pagination-controls .btn.btn-primary.active {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* --- NEW & UPDATED STYLES FOR SEARCH AND FILTER SECTION --- */
+        .card-body .form-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: .5rem;
+            display: block;
+            font-size: 1.1rem; /* Make labels slightly larger too */
+        }
+
+        /* Target the search input specifically */
+        #exerciseSearch.form-control-lg {
+            height: 3.5rem; /* Increased height for the search input */
+            font-size: 1.25rem; /* Larger font size for search input */
+            padding: 0.75rem 1.5rem; /* Adjust padding if needed */
+        }
+
+        /* Target all filter dropdowns */
+        .form-select-lg {
+            height: 2.5rem; /* Increased height for dropdowns */
+            font-size: 1.15rem; /* Larger font size for dropdowns */
+            padding: 0.75rem 1.5rem 0.75rem 1rem; /* Adjust padding, especially for arrow */
+        }
+
+        .form-control-lg, .form-select-lg {
+            border-width: 1.5px;
+            border-color: #ced4da;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.05);
+        }
+
+        .form-control-lg:focus, .form-select-lg:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+        }
+        .form-control-lg {
+            width: 40%;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="fixed-signin-button">
+        <button class="btn btn-primary">Sign In</button>
+    </div>
+
+    <div class="d-flex" id="wrapper">
+        <aside class="bg-white border-end" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light py-4 ps-4">
+                <h1 class="h5 d-inline-block align-middle mb-0">Muscle Memory</h1>
+            </div>
+            <nav class="list-group list-group-flush">
+                <a href="/dashboard.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-home me-2"></i> Dashboard
+                </a>
+                <a href="/index.html" class="list-group-item list-group-item-action bg-light p-3 active">
+                    <i class="fas fa-dumbbell me-2"></i> Exercise Library
+                </a>
+                <a href="/workout-builder.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-edit me-2"></i> Workout Builder
+                </a>
+                <a href="/my-schedule.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-calendar-alt me-2"></i> My Schedule
+                </a>
+                <a href="/progress-track.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-chart-line me-2"></i> Progress Track
+                </a>
+                <a href="/education-hub.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-book me-2"></i> Education Hub
+                </a>
+                <a href="/clients.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-users me-2"></i> Clients <span class="badge bg-primary rounded-pill ms-auto">5</span>
+                </a>
+                <a href="/settings.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-cog me-2"></i> Settings
+                </a>
+            </nav>
+        </aside>
+
+        <main id="page-content-wrapper" class="flex-grow-1">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary d-lg-none" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+                    </div>
+            </nav>
+
+            <div class="container-fluid py-4">
+                <h2 class="mb-4">Exercise Library</h2>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">Browse Exercises</h3>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <label for="exerciseSearch" class="form-label">Search Exercises</label>
+                                <input type="text" class="form-control form-control-lg" id="exerciseSearch" placeholder="Search by exercise name or description..." aria-label="Search exercises">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="muscleGroupFilter" class="form-label">Filter by Muscle Group</label>
+                                <select class="form-select form-select-lg" id="muscleGroupFilter">
+                                    <option value="">All Muscle Groups</option>
+                                    <option value="Chest">Chest</option>
+                                    <option value="Back">Back</option>
+                                    <option value="Legs">Legs</option>
+                                    <option value="Arms">Arms</option>
+                                    <option value="Shoulders">Shoulders</option>
+                                    <option value="Core">Core</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="equipmentFilter" class="form-label">Filter by Equipment</label>
+                                <select class="form-select form-select-lg" id="equipmentFilter">
+                                    <option value="">All Equipment</option>
+                                    <option value="Dumbbells">Dumbbells</option>
+                                    <option value="Barbell">Barbell</option>
+                                    <option value="Bodyweight">Bodyweight</option>
+                                    <option value="Cables">Cables</option>
+                                    <option value="Machine">Machine</option>
+                                    <option value="Equipment">Other Equipment</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="difficultyFilter" class="form-label">Filter by Difficulty</label>
+                                <select class="form-select form-select-lg" id="difficultyFilter">
+                                    <option value="">All Difficulties</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="exerciseList" class="d-grid gap-3 exercise-list-container">
+                            <div class="loading-message"><i class="fas fa-spinner fa-pulse me-2"></i> Loading exercises...</div>
+                            </div>
+
+                        <div class="pagination-controls" id="paginationControls">
+                            </div>
+                    </div>
+                </div>
+
+                <footer class="text-center text-muted small py-4 mt-5 border-top">
+                    &copy; 2025 Muscle Memory. All rights reserved.
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Select elements now that they are present in the HTML
+            const exerciseSearch = document.getElementById('exerciseSearch');
+            const muscleGroupFilter = document.getElementById('muscleGroupFilter');
+            const equipmentFilter = document.getElementById('equipmentFilter');
+            const difficultyFilter = document.getElementById('difficultyFilter');
+            const exerciseListContainer = document.getElementById('exerciseList');
+            const paginationControls = document.getElementById('paginationControls');
+
+            let currentPage = 1;
+            const itemsPerPage = 20; // Matches backend limit
+
+            // --- Sidebar Toggle Logic (common to all pages) ---
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', event => {
+                    event.preventDefault();
+                    document.body.classList.toggle('sb-sidenav-toggled');
+                });
+            }
+
+            // --- Function to fetch and display exercises ---
+            async function fetchAndDisplayExercises() {
+                exerciseListContainer.innerHTML = '<div class="loading-message"><i class="fas fa-spinner fa-pulse me-2"></i> Loading exercises...</div>';
+                paginationControls.innerHTML = ''; // Clear pagination on new search/filter
+
+                const searchQuery = exerciseSearch.value.trim();
+                const muscleGroup = muscleGroupFilter.value;
+                const equipment = equipmentFilter.value;
+                const difficulty = difficultyFilter.value;
+
+                let url = `http://localhost:3000/api/exercises?page=${currentPage}&limit=${itemsPerPage}`;
+                if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+                if (muscleGroup) url += `&muscle_group=${encodeURIComponent(muscleGroup)}`;
+                if (equipment) url += `&equipment=${encodeURIComponent(equipment)}`;
+                if (difficulty) url += `&difficulty=${encodeURIComponent(difficulty)}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json(); // Data now contains { exercises, pagination }
+
+                    const exercises = data.exercises;
+                    const pagination = data.pagination;
+
+                    exerciseListContainer.innerHTML = ''; // Clear loading message
+
+                    if (exercises.length === 0) {
+                        exerciseListContainer.innerHTML = '<div class="no-exercises-message">No exercises found matching your criteria.</div>';
+                    } else {
+                        exercises.forEach(exercise => {
+                            const exerciseItem = document.createElement('div');
+                            exerciseItem.classList.add('card', 'shadow-sm', 'exercise-item');
+                            exerciseItem.innerHTML = `
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="exercise-details flex-grow-1">
+                                        <h5 class="card-title mb-0">${exercise.name}</h5>
+                                        <p class="card-text text-muted small mb-0">${exercise.muscle_group} | ${exercise.equipment} | ${exercise.difficulty}</p>
+                                        <p class="card-text small mt-1">${exercise.description}</p>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm add-exercise-to-plan-btn" data-exercise-name="${exercise.name}">Add to Plan</button>
+                                </div>
+                            `;
+                            exerciseListContainer.appendChild(exerciseItem);
+                        });
+                        renderPagination(pagination.totalPages, pagination.currentPage);
+                    }
+                } catch (error) {
+                    console.error('Error fetching exercises:', error);
+                    exerciseListContainer.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle me-2"></i> Error loading exercises: ${error.message}. Please ensure backend is running.</div>`;
+                }
+            }
+
+            // --- Render Pagination Controls ---
+            function renderPagination(totalPages, currentPage) {
+                paginationControls.innerHTML = '';
+
+                // Previous button
+                const prevBtn = document.createElement('button');
+                prevBtn.classList.add('btn', 'btn-outline-secondary', 'btn-sm');
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> Prev';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.addEventListener('click', () => {
+                    currentPage--;
+                    fetchAndDisplayExercises();
+                });
+                paginationControls.appendChild(prevBtn);
+
+                // Page numbers (simple approach, could be more complex for many pages)
+                const maxPageButtons = 5; // Max number of page buttons to show
+                let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+                let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+                if (endPage - startPage + 1 < maxPageButtons) {
+                    startPage = Math.max(1, endPage - maxPageButtons + 1);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.classList.add('btn', 'btn-outline-secondary', 'btn-sm');
+                    if (i === currentPage) {
+                        pageBtn.classList.add('btn-primary', 'active'); // Bootstrap active style
+                    }
+                    pageBtn.textContent = i;
+                    pageBtn.addEventListener('click', () => {
+                        currentPage = i;
+                        fetchAndDisplayExercises();
+                    });
+                    paginationControls.appendChild(pageBtn);
+                }
+
+                // Next button
+                const nextBtn = document.createElement('button');
+                nextBtn.classList.add('btn', 'btn-outline-secondary', 'btn-sm');
+                nextBtn.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.addEventListener('click', () => {
+                    currentPage++;
+                    fetchAndDisplayExercises();
+                });
+                paginationControls.appendChild(nextBtn);
+            }
+
+            // --- Event Listeners for Filters and Search ---
+            // Debounce function to limit how often fetch is called during typing
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    const context = this;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(context, args), delay);
+                };
+            }
+
+            const debouncedFetch = debounce(() => {
+                currentPage = 1; // Reset to first page on new search/filter
+                fetchAndDisplayExercises();
+            }, 300); // 300ms delay
+
+            // Ensure these elements exist before adding listeners
+            if (exerciseSearch) exerciseSearch.addEventListener('input', debouncedFetch);
+            if (muscleGroupFilter) muscleGroupFilter.addEventListener('change', debouncedFetch);
+            if (equipmentFilter) equipmentFilter.addEventListener('change', debouncedFetch);
+            if (difficultyFilter) difficultyFilter.addEventListener('change', debouncedFetch);
+
+            // --- Initial Load of Exercises ---
+            fetchAndDisplayExercises();
+        });
+    </script>
+</body>
+</html>

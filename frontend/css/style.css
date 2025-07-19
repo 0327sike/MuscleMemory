@@ -1,0 +1,393 @@
+/* Custom CSS for Muscle Memory App - ULTIMATE Refinement for Layout & No Overlap */
+
+/* --- Global Resets & Variables --- */
+:root {
+    --primary-blue: #007bff;
+    --primary-dark-blue: #0056b3;
+    --accent-light-blue: #e0f2ff;
+    --text-dark: #343a40;
+    --text-muted: #6c757d;
+    --border-light: #e9ecef;
+    --bg-light: #f8f9fa;
+    --bg-white: #ffffff;
+    --shadow-light: rgba(0, 0, 0, 0.075);
+    --shadow-medium: rgba(0, 0, 0, 0.1);
+    --spacing-unit: 1rem; /* Base for consistent spacing */
+    --sidebar-width: 15rem;
+}
+
+html, body {
+    height: 100%; /* Ensure html and body take full height */
+    overflow-x: hidden; /* Absolutely prevent horizontal scrolling/overlap */
+}
+
+/* --- Base Typography --- */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-unit);
+}
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.15rem; }
+h5 { font-size: 1rem; }
+
+p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-unit);
+}
+
+/* --- Fixed Sign In Button --- */
+#fixed-signin-button {
+    position: fixed;
+    top: 20px; /* Distance from the top edge */
+    right: 20px; /* Distance from the right edge */
+    z-index: 1040; /* Higher than sidebar and navbar to ensure it's on top */
+}
+/* Adjustments for fixed sign-in button for smaller screens if it overlaps sidebar toggle */
+@media (max-width: 767.98px) {
+    #fixed-signin-button {
+        top: 15px; /* Slightly less space from top */
+        right: 15px; /* Slightly less space from right */
+    }
+}
+@media (max-width: 575.98px) { /* Extra small devices */
+    #fixed-signin-button .btn {
+        padding: 0.5rem 0.8rem; /* Smaller padding for button on very small screens */
+        font-size: 0.8rem;
+    }
+}
+
+
+/* --- Main Wrapper Layout --- */
+#wrapper {
+    display: flex;
+    width: 100%; /* Ensure wrapper takes full width */
+    min-height: 100vh; /* Ensure wrapper takes full viewport height */
+    overflow-x: hidden; /* Critical for overall layout control */
+    position: relative; /* For z-indexing children if needed */
+}
+
+/* --- Sidebar Styling --- */
+#sidebar-wrapper {
+    width: var(--sidebar-width); /* Fixed width for sidebar */
+    min-height: 100vh;
+    background-color: var(--bg-white);
+    box-shadow: 2px 0 10px var(--shadow-light);
+    position: fixed; /* Fixed position for overlay on small screens */
+    top: 0;
+    bottom: 0;
+    left: calc(-1 * var(--sidebar-width)); /* Start off-screen */
+    z-index: 1030; /* High z-index to overlay content */
+    transition: left .25s ease-out; /* Smooth slide in/out */
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    display: flex; /* Make sidebar content a flex container */
+    flex-direction: column; /* Stack children vertically */
+}
+
+#sidebar-wrapper .sidebar-heading {
+    padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
+    border-bottom: 1px solid var(--border-light);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    flex-shrink: 0;
+}
+
+#sidebar-wrapper .sidebar-heading img {
+    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.1));
+}
+
+#sidebar-wrapper .list-group {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+#sidebar-wrapper .list-group-flush .list-group-item {
+    border-right: 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--border-light);
+    border-radius: 0;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    color: var(--text-dark);
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#sidebar-wrapper .list-group-item-action:hover {
+    background-color: var(--accent-light-blue);
+    color: var(--primary-dark-blue);
+}
+
+#sidebar-wrapper .list-group-item-action.active {
+    background-color: var(--primary-blue) !important;
+    color: var(--bg-white) !important;
+    border-left: 5px solid var(--primary-dark-blue) !important;
+    font-weight: 600;
+}
+
+#sidebar-wrapper .list-group-item i {
+    flex-shrink: 0;
+    margin-right: calc(var(--spacing-unit) * 0.75);
+}
+
+#sidebar-wrapper .list-group-item span.badge {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+
+/* --- Page Content Wrapper Styling --- */
+#page-content-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    transition: margin-left .25s ease-out;
+    background-color: var(--bg-light);
+}
+
+/* --- Toggled State (Mobile vs. Desktop) --- */
+#wrapper.toggled #sidebar-wrapper {
+    left: 0;
+}
+
+#wrapper.toggled #page-content-wrapper {
+    /* No margin-left change needed for mobile; sidebar overlays */
+}
+
+
+/* Desktop Breakpoint */
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        position: relative;
+        left: 0;
+        box-shadow: none;
+        border-right: 1px solid var(--border-light);
+        z-index: auto;
+    }
+
+    #page-content-wrapper {
+        margin-left: var(--sidebar-width); /* Push content over by sidebar width */
+        width: auto;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+
+    #wrapper.toggled #page-content-wrapper {
+        margin-left: 0;
+    }
+
+    #sidebarToggle {
+        display: none;
+    }
+}
+
+
+/* --- Topbar Styling --- */
+.navbar {
+    background-color: var(--bg-white) !important;
+    border-bottom: 1px solid var(--border-light);
+    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5);
+    box-shadow: 0 2px 4px var(--shadow-light);
+}
+
+.navbar .fa-user-circle {
+    color: var(--primary-blue);
+    font-size: 2.2rem;
+}
+
+/* --- Card & Section Styling --- */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px var(--shadow-light);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-body {
+    padding: calc(var(--spacing-unit) * 1.75);
+}
+
+.container-fluid > .card:not(:last-child) {
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+/* --- Buttons --- */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0056b3 100%);
+    border: none;
+    border-radius: 0.5rem;
+    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark-blue) 0%, #004085 100%);
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-sm {
+    padding: calc(var(--spacing-unit) * 0.5) var(--spacing-unit);
+    font-size: 0.875rem;
+    border-radius: 0.4rem;
+}
+
+.btn-outline-primary {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    transition: all 0.3s ease;
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary-blue);
+    color: var(--bg-white);
+}
+
+.btn-outline-secondary {
+    border-color: var(--text-muted);
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+.btn-outline-secondary:hover {
+    background-color: var(--text-muted);
+    color: var(--bg-white);
+}
+
+.btn-outline-info {
+    border-color: #0dcaf0;
+    color: #0dcaf0;
+    transition: all 0.3s ease;
+}
+.btn-outline-info:hover {
+    background-color: #0dcaf0;
+    color: var(--bg-white);
+}
+
+/* --- Interactive Body Diagram --- */
+.human-body-diagram img {
+    border: 1px solid var(--border-light);
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 10px var(--shadow-medium);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.human-body-diagram img:hover {
+    transform: scale(1.01);
+}
+
+/* --- Suggested Workouts List --- */
+.workout-list {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 15px;
+    display: grid;
+    gap: calc(var(--spacing-unit) * 0.75);
+}
+
+/* Custom scrollbar */
+.workout-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.workout-list::-webkit-scrollbar-track {
+    background: var(--bg-light);
+    border-radius: 10px;
+}
+
+.workout-list::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 10px;
+}
+
+.workout-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.workout-item.card {
+    border: 1px solid var(--border-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.workout-item.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    border-color: var(--primary-blue);
+}
+
+.workout-item img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.workout-item .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.workout-item .card-text {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+/* Today's Workout Item Styling */
+.shadow-sm-light {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.04)!important;
+}
+.p-3.border.rounded {
+    border-color: var(--border-light) !important;
+    transition: transform 0.2s ease;
+}
+.p-3.border.rounded:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .25rem .5rem rgba(0,0,0,.08)!important;
+}
+.p-3.border.rounded i {
+    color: var(--primary-blue);
+}
+.p-3.border.rounded .text-success {
+    color: #198754 !important;
+}
+.p-3.border.rounded .text-info {
+    color: #0dcaf0 !important;
+}
+
+/* Quick Actions Button Spacing */
+/* No custom CSS needed here if g-3 is effective */
+
+/* Loading/Error Alerts */
+.spinner-border {
+    color: var(--primary-blue) !important;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}

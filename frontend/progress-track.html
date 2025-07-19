@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Track - Muscle Memory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9Oer-2iRpZ8sBKMf/h/A0oI5Q5e0t2jP6A7oB5C5T5w" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="fixed-signin-button">
+        <button class="btn btn-primary">Sign In</button>
+    </div>
+
+    <div class="d-flex" id="wrapper">
+        <aside class="bg-white border-end" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light py-4 ps-4">
+                <h1 class="h5 d-inline-block align-middle mb-0">Muscle Memory</h1>
+            </div>
+            <nav class="list-group list-group-flush">
+                <a href="/dashboard.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-home me-2"></i> Dashboard
+                </a>
+                <a href="/index.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-dumbbell me-2"></i> Exercise Library
+                </a>
+                <a href="/workout-builder.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-edit me-2"></i> Workout Builder
+                </a>
+                <a href="/my-schedule.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-calendar-alt me-2"></i> My Schedule
+                </a>
+                <a href="/progress-track.html" class="list-group-item list-group-item-action bg-light p-3 active">
+                    <i class="fas fa-chart-line me-2"></i> Progress Track
+                </a>
+                <a href="/education-hub.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-book me-2"></i> Education Hub
+                </a>
+                <a href="/clients.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-users me-2"></i> Clients <span class="badge bg-primary rounded-pill ms-auto">5</span>
+                </a>
+                <a href="/settings.html" class="list-group-item list-group-item-action bg-light p-3">
+                    <i class="fas fa-cog me-2"></i> Settings
+                </a>
+            </nav>
+        </aside>
+
+        <main id="page-content-wrapper" class="flex-grow-1">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary d-lg-none" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+                </div>
+            </nav>
+
+            <div class="container-fluid py-4">
+                <h2 class="mb-4">Your Fitness Progress</h2>
+
+                <div class="row g-4 mb-4" id="progressSummary">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Workouts Logged</h5>
+                                <p class="display-4 fw-bold text-primary" id="workoutsLoggedTotal">...</p>
+                                <small class="text-muted">Total workouts since joining</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Strength Gains</h5>
+                                <p class="display-4 fw-bold text-success" id="strengthGainPercentage">...</p>
+                                <small class="text-muted">Avg. increase in max lifts</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Consistency Score</h5>
+                                <p class="display-4 fw-bold text-info" id="consistencyScorePercentage">...</p>
+                                <small class="text-muted">Of scheduled workouts completed</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">Visual Progress</h3>
+                        <p class="card-text text-muted mb-4">Track your performance over time.</p>
+                        
+                        <div class="row g-4">
+                            <div class="col-lg-6">
+                                <div class="card shadow-sm-light h-100">
+                                    <div class="card-body text-center">
+                                        <h4 class="mb-3">Weight Lifted (Bench Press - Last 6 Months)</h4>
+                                        <canvas id="weightLiftedChart"></canvas>
+                                        <small class="text-muted d-block mt-2">Max Weight (kg)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card shadow-sm-light h-100">
+                                    <div class="card-body text-center">
+                                        <h4 class="mb-3">Workout Frequency (Last 12 Weeks)</h4>
+                                        <canvas id="workoutFrequencyChart"></canvas>
+                                        <small class="text-muted d-block mt-2">Workouts per week</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">Log a New Lift</h3>
+                        <form id="logLiftForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="liftExerciseSelect" class="form-label">Exercise</label>
+                                    <select class="form-select" id="liftExerciseSelect" required>
+                                        <option value="">Select Exercise</option>
+                                        </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="liftDate" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="liftDate" required>
+                                </div>
+                            </div>
+                            <div id="setsRepsWeightContainer" class="mt-3 border p-3 rounded bg-light">
+                                <h6 class="mb-3">Sets & Reps <button type="button" class="btn btn-sm btn-outline-success ms-2" id="addSetBtn"><i class="fas fa-plus"></i> Add Set</button></h6>
+                                <div class="set-row row g-2 align-items-center mb-2">
+                                    <div class="col-auto"><span class="fw-bold">Set 1:</span></div>
+                                    <div class="col"><input type="number" class="form-control form-control-sm" placeholder="Reps" min="1" required data-set-field="reps"></div>
+                                    <div class="col"><input type="number" class="form-control form-control-sm" placeholder="Weight" step="0.5" min="0" required data-set-field="weight"></div>
+                                    <div class="col-auto"><select class="form-select form-select-sm" data-set-field="unit"><option>kg</option><option>lbs</option></select></div>
+                                    <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-set-btn"><i class="fas fa-minus"></i></button></div>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <label for="liftNotes" class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="liftNotes" rows="2"></textarea>
+                            </div>
+                            <div class="col-12 text-end mt-4">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i> Save Lift Log</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">Progress Photos</h3>
+                        <p class="card-text text-muted mb-4">Visualize your transformation.</p>
+
+                        <form id="uploadPhotoForm" class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="photoDate" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="photoDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="imageUrl" class="form-label">Image URL</label>
+                                    <input type="url" class="form-control" id="imageUrl" placeholder="e.g., https://example.com/myphoto.jpg" required>
+                                    <div class="form-text">For a real app, this would be an actual file upload.</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="photoDescription" class="form-label">Description (Optional)</label>
+                                    <textarea class="form-control" id="photoDescription" rows="2" placeholder="e.g., Week 8 progress, feeling stronger!"></textarea>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-success"><i class="fas fa-upload me-2"></i> Upload Photo</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <h4 class="mb-3">Your Photo Gallery</h4>
+                        <div class="row g-3" id="photoGallery">
+                            <div class="loading-message"><i class="fas fa-spinner fa-pulse me-2"></i> Loading photos...</div>
+                            </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-3">Milestones & Achievements</h3>
+                        <p class="card-text text-muted mb-4">Celebrate your big wins!</p>
+
+                        <form id="logMilestoneForm" class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="milestoneName" class="form-label">Milestone Name</label>
+                                    <input type="text" class="form-control" id="milestoneName" placeholder="e.g., First Pull-up, Ran 5k" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="milestoneDate" class="form-label">Date Achieved</label>
+                                    <input type="date" class="form-control" id="milestoneDate" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="milestoneDescription" class="form-label">Description (Optional)</label>
+                                    <textarea class="form-control" id="milestoneDescription" rows="2" placeholder="More details about this achievement..."></textarea>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-info"><i class="fas fa-flag-checkered me-2"></i> Log Milestone</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <h4 class="mb-3">Your Milestones</h4>
+                        <div class="row g-3" id="milestonesContainer">
+                            <div class="loading-message"><i class="fas fa-spinner fa-pulse me-2"></i> Loading milestones...</div>
+                            </div>
+                    </div>
+                </div>
+                
+                <footer class="text-center text-muted small py-4 mt-5 border-top">
+                    &copy; 2025 Muscle Memory. All rights reserved.
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Mock User ID for testing (replace with actual user ID from login once implemented)
+            // IMPORTANT: Get a real user ID from your DB after registering a user
+            // e.g., register via your backend's /api/auth/register endpoint and use that user's ID here.
+            const MOCK_USER_ID = 'YOUR_ACTUAL_TEST_USER_ID_FROM_DB'; // <<< MUST REPLACE THIS
+            if (MOCK_USER_ID === 'YOUR_ACTUAL_TEST_USER_ID_FROM_DB') {
+                alert("CRITICAL: Please update progress-track.html with a valid MOCK_USER_ID from your database to see data.");
+                console.error("MOCK_USER_ID not set. Progress data will not load correctly.");
+            }
+
+            // Elements for summary
+            const workoutsLoggedTotalElem = document.getElementById('workoutsLoggedTotal');
+            const strengthGainPercentageElem = document.getElementById('strengthGainPercentage');
+            const consistencyScorePercentageElem = document.getElementById('consistencyScorePercentage');
+
+            // Elements for charts
+            const weightLiftedChartCanvas = document.getElementById('weightLiftedChart');
+            const workoutFrequencyChartCanvas = document.getElementById('workoutFrequencyChart');
+            let weightLiftedChartInstance = null; // Store chart instances
+            let workoutFrequencyChartInstance = null;
+
+            // Elements for Log Lift Form
+            const logLiftForm = document.getElementById('logLiftForm');
+            const liftExerciseSelect = document.getElementById('liftExerciseSelect');
+            const liftDateInput = document.getElementById('liftDate');
+            const setsRepsWeightContainer = document.getElementById('setsRepsWeightContainer');
+            const addSetBtn = document.getElementById('addSetBtn');
+            const liftNotesInput = document.getElementById('liftNotes');
+
+            // Elements for Progress Photo Form/Gallery
+            const uploadPhotoForm = document.getElementById('uploadPhotoForm');
+            const photoDateInput = document.getElementById('photoDate');
+            const imageUrlInput = document.getElementById('imageUrl');
+            const photoDescriptionInput = document.getElementById('photoDescription');
+            const photoGalleryContainer = document.getElementById('photoGallery');
+
+            // Elements for Milestone Form/List
+            const logMilestoneForm = document.getElementById('logMilestoneForm');
+            const milestoneNameInput = document.getElementById('milestoneName');
+            const milestoneDateInput = document.getElementById('milestoneDate');
+            const milestoneDescriptionInput = document.getElementById('milestoneDescription');
+            const milestonesListContainer = document.getElementById('milestonesContainer'); // Changed from milestonesContainer, careful with ID duplication
+
+
+            // --- Sidebar Toggle Logic ---
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', event => {
+                    event.preventDefault();
+                    document.body.classList.toggle('sb-sidenav-toggled');
+                });
+            }
+
+            // --- Utility Functions ---
+            function showLoading(element) {
+                element.innerHTML = '<div class="loading-message"><i class="fas fa-spinner fa-pulse me-2"></i> Loading...</div>';
+            }
+            function showError(element, message) {
+                element.innerHTML = `<div class="error-message text-danger"><i class="fas fa-exclamation-triangle me-2"></i> ${message}</div>`;
+            }
+
+            // --- Fetch Exercise List for Lift Log Form ---
+            async function fetchExercisesForSelect() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/exercises?limit=1000'); // Fetch all exercises, assuming max 1000 for dropdown
+                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                    const data = await response.json();
+                    const exercises = data.exercises || []; // Ensure exercises array is present
+
+                    liftExerciseSelect.innerHTML = '<option value="">Select Exercise</option>'; // Clear and add default
+                    exercises.forEach(exercise => {
+                        const option = document.createElement('option');
+                        option.value = exercise.id; // Use exercise ID as value
+                        option.textContent = exercise.name;
+                        liftExerciseSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error fetching exercises for select:', error);
+                    liftExerciseSelect.innerHTML = '<option value="">Error loading exercises</option>';
+                }
+            }
+            fetchExercisesForSelect(); // Call on page load
+
+            // --- Lift Log Form: Add/Remove Sets ---
+            let setCounter = 1;
+            function addSetRow() {
+                setCounter++;
+                const newSetRow = document.createElement('div');
+                newSetRow.classList.add('set-row', 'row', 'g-2', 'align-items-center', 'mb-2');
+                newSetRow.innerHTML = `
+                    <div class="col-auto"><span class="fw-bold">Set ${setCounter}:</span></div>
+                    <div class="col"><input type="number" class="form-control form-control-sm" placeholder="Reps" min="1" required data-set-field="reps"></div>
+                    <div class="col"><input type="number" class="form-control form-control-sm" placeholder="Weight" step="0.5" min="0" required data-set-field="weight"></div>
+                    <div class="col-auto"><select class="form-select form-select-sm" data-set-field="unit"><option>kg</option><option>lbs</option></select></div>
+                    <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-set-btn"><i class="fas fa-minus"></i></button></div>
+                `;
+                setsRepsWeightContainer.appendChild(newSetRow);
+                newSetRow.querySelector('.remove-set-btn').addEventListener('click', function() {
+                    newSetRow.remove();
+                    // Optionally re-number sets here if desired, or just leave as is
+                });
+            }
+            addSetBtn.addEventListener('click', addSetRow);
+            // Attach listener to initial remove button (if any)
+            setsRepsWeightContainer.querySelector('.remove-set-btn').addEventListener('click', function() {
+                this.closest('.set-row').remove();
+            });
+
+            // --- Handle Lift Log Form Submission ---
+            logLiftForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const exerciseId = liftExerciseSelect.value;
+                const logDate = liftDateInput.value;
+                const notes = liftNotesInput.value.trim();
+
+                const setsRepsWeight = [];
+                setsRepsWeightContainer.querySelectorAll('.set-row').forEach(row => {
+                    const reps = row.querySelector('[data-set-field="reps"]').value;
+                    const weight = row.querySelector('[data-set-field="weight"]').value;
+                    const unit = row.querySelector('[data-set-field="unit"]').value;
+                    if (reps && weight) { // Only add if both reps and weight are provided
+                        setsRepsWeight.push({ reps: parseInt(reps), weight: parseFloat(weight), unit: unit });
+                    }
+                });
+
+                if (!exerciseId || !logDate || setsRepsWeight.length === 0) {
+                    alert('Please select an exercise, date, and enter at least one set with reps and weight.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:3000/api/users/${MOCK_USER_ID}/lift-logs`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // 'Authorization': `Bearer YOUR_AUTH_TOKEN` // Re-enable for production
+                        },
+                        body: JSON.stringify({ exerciseId, logDate, setsRepsWeight, notes })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to save lift log.');
+                    }
+
+                    alert('Lift log saved successfully!');
+                    logLiftForm.reset(); // Clear form
+                    // Clear dynamically added sets and add back one initial set
+                    setsRepsWeightContainer.innerHTML = `
+                        <h6 class="mb-3">Sets & Reps <button type="button" class="btn btn-sm btn-outline-success ms-2" id="addSetBtn"><i class="fas fa-plus"></i> Add Set</button></h6>
+                        <div class="set-row row g-2 align-items-center mb-2">
+                            <div class="col-auto"><span class="fw-bold">Set 1:</span></div>
+                            <div class="col"><input type="number" class="form-control form-control-sm" placeholder="Reps" min="1" required data-set-field="reps"></div>
+                            <div class="col"><input type="number" class="form-control form-control-sm" placeholder="Weight" step="0.5" min="0" required data-set-field="weight"></div>
+                            <div class="col-auto"><select class="form-select form-select-sm" data-set-field="unit"><option>kg</option><option>lbs</option></select></div>
+                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-danger remove-set-btn"><i class="fas fa-minus"></i></button></div>
+                        </div>
+                    `;
+                    setCounter = 1; // Reset counter
+                    // Re-attach addSetBtn listener
+                    document.getElementById('addSetBtn').addEventListener('click', addSetRow);
+                    setsRepsWeightContainer.querySelector('.remove-set-btn').addEventListener('click', function() {
+                        this.closest('.set-row').remove();
+                    });
+
+                    fetchAndDisplayProgress(MOCK_USER_ID); // Refresh data
+                } catch (error) {
+                    console.error('Error saving lift log:', error);
+                    alert(`Error saving lift log: ${error.message}`);
+                }
+            });
+
+            // --- Handle Progress Photo Upload Form Submission ---
+            uploadPhotoForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const photoDate = photoDateInput.value;
+                const imageUrl = imageUrlInput.value.trim();
+                const description = photoDescriptionInput.value.trim();
+
+                if (!photoDate || !imageUrl) {
+                    alert('Please provide a date and image URL for your progress photo.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:3000/api/users/${MOCK_USER_ID}/progress-photos`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // 'Authorization': `Bearer YOUR_AUTH_TOKEN`
+                        },
+                        body: JSON.stringify({ photoDate, description, imageUrl })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to upload photo.');
+                    }
+
+                    alert('Progress photo uploaded successfully!');
+                    uploadPhotoForm.reset(); // Clear form
+                    fetchAndDisplayPhotos(MOCK_USER_ID); // Refresh photo gallery
+                } catch (error) {
+                    console.error('Error uploading photo:', error);
+                    alert(`Error uploading photo: ${error.message}`);
+                }
+            });
+
+            // --- Fetch and Display Progress Photos ---
+            async function fetchAndDisplayPhotos(userId) {
+                showLoading(photoGalleryContainer);
+                try {
+                    const response = await fetch(`http://localhost:3000/api/users/${userId}/progress-photos`);
+                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                    const photos = await response.json();
+
+                    photoGalleryContainer.innerHTML = ''; // Clear loading/old content
+                    if (photos.length === 0) {
+                        photoGalleryContainer.innerHTML = '<div class="no-results-message">No progress photos uploaded yet.</div>';
+                        return;
+                    }
+
+                    photos.forEach(photo => {
+                        const colDiv = document.createElement('div');
+                        colDiv.classList.add('col-md-6', 'col-lg-4'); // Bootstrap grid for photos
+                        colDiv.innerHTML = `
+                            <div class="card shadow-sm h-100">
+                                <img src="${photo.image_url}" class="card-img-top" alt="${photo.description || 'Progress Photo'}">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-0">${new Date(photo.photo_date).toLocaleDateString()}</h5>
+                                    <p class="card-text small text-muted">${photo.description || 'No description'}</p>
+                                    <button class="btn btn-sm btn-outline-danger delete-photo-btn" data-photo-id="${photo.id}"><i class="fas fa-trash"></i> Delete</button>
+                                </div>
+                            </div>
+                        `;
+                        photoGalleryContainer.appendChild(colDiv);
+                    });
+                    // Add delete listeners
+                    photoGalleryContainer.querySelectorAll('.delete-photo-btn').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const photoId = this.dataset.photoId;
+                            if (confirm('Are you sure you want to delete this photo?')) {
+                                try {
+                                    const response = await fetch(`http://localhost:3000/api/users/${MOCK_USER_ID}/progress-photos/${photoId}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            // 'Authorization': `Bearer YOUR_AUTH_TOKEN`
+                                        }
+                                    });
+                                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                                    alert('Photo deleted!');
+                                    fetchAndDisplayPhotos(MOCK_USER_ID); // Refresh gallery
+                                } catch (error) {
+                                    console.error('Error deleting photo:', error);
+                                    alert(`Error deleting photo: ${error.message}`);
+                                }
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching photos:', error);
+                    showError(photoGalleryContainer, `Failed to load photos: ${error.message}`);
+                }
+            }
+
+            // --- Handle Milestone Log Form Submission ---
+            logMilestoneForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const name = milestoneNameInput.value.trim();
+                const dateAchieved = milestoneDateInput.value;
+                const description = milestoneDescriptionInput.value.trim();
+
+                if (!name || !dateAchieved) {
+                    alert('Please provide a milestone name and date achieved.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:3000/api/users/${MOCK_USER_ID}/milestones`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // 'Authorization': `Bearer YOUR_AUTH_TOKEN`
+                        },
+                        body: JSON.stringify({ name, description, dateAchieved })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to log milestone.');
+                    }
+
+                    alert('Milestone logged successfully!');
+                    logMilestoneForm.reset(); // Clear form
+                    fetchAndDisplayMilestones(MOCK_USER_ID); // Refresh milestones list
+                    fetchAndDisplayProgress(MOCK_USER_ID); // Refresh summary (if relevant)
+                } catch (error) {
+                    console.error('Error logging milestone:', error);
+                    alert(`Error logging milestone: ${error.message}`);
+                }
+            });
+
+            // --- Fetch and Display Milestones ---
+            async function fetchAndDisplayMilestones(userId) {
+                showLoading(milestonesListContainer);
+                try {
+                    const response = await fetch(`http://localhost:3000/api/users/${userId}/milestones`);
+                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                    const milestones = await response.json();
+
+                    milestonesListContainer.innerHTML = ''; // Clear loading/old content
+                    if (milestones.length === 0) {
+                        milestonesListContainer.innerHTML = '<div class="no-results-message">No milestones achieved yet. Keep going!</div>';
+                        return;
+                    }
+
+                    milestones.forEach(milestone => {
+                        const colDiv = document.createElement('div');
+                        colDiv.classList.add('col-md-6', 'col-lg-4');
+                        colDiv.innerHTML = `
+                            <div class="p-3 border rounded bg-light d-flex align-items-center shadow-sm-light">
+                                <i class="fas fa-trophy fa-2x text-warning me-3"></i> 
+                                <div>
+                                    <h5 class="mb-0">${milestone.name}</h5>
+                                    <small class="text-muted">${milestone.description ? milestone.description + ' | ' : ''}Achieved on ${new Date(milestone.dateAchieved).toLocaleDateString()}</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger ms-auto delete-milestone-btn" data-milestone-id="${milestone.id}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                        milestonesListContainer.appendChild(colDiv);
+                    });
+                    // Add delete listeners
+                    milestonesListContainer.querySelectorAll('.delete-milestone-btn').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const milestoneId = this.dataset.milestoneId;
+                            if (confirm('Are you sure you want to delete this milestone?')) {
+                                try {
+                                    const response = await fetch(`http://localhost:3000/api/users/${MOCK_USER_ID}/milestones/${milestoneId}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            // 'Authorization': `Bearer YOUR_AUTH_TOKEN`
+                                        }
+                                    });
+                                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                                    alert('Milestone deleted!');
+                                    fetchAndDisplayMilestones(MOCK_USER_ID); // Refresh list
+                                    fetchAndDisplayProgress(MOCK_USER_ID); // Refresh summary
+                                } catch (error) {
+                                    console.error('Error deleting milestone:', error);
+                                    alert(`Error deleting milestone: ${error.message}`);
+                                }
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching milestones:', error);
+                    showError(milestonesListContainer, `Failed to load milestones: ${error.message}`);
+                }
+            }
+
+
+            // --- Initial Data Load on Page Load ---
+            if (MOCK_USER_ID !== 'YOUR_ACTUAL_TEST_USER_ID_FROM_DB') {
+                 fetchAndDisplayProgress(MOCK_USER_ID);
+                 fetchAndDisplayPhotos(MOCK_USER_ID);
+                 fetchAndDisplayMilestones(MOCK_USER_ID);
+            } else {
+                workoutsLoggedTotalElem.textContent = 'N/A';
+                strengthGainPercentageElem.textContent = 'N/A';
+                consistencyScorePercentageElem.textContent = 'N/A';
+                photoGalleryContainer.innerHTML = `<div class="error-message">Please set a valid MOCK_USER_ID in the JavaScript to load photos.</div>`;
+                milestonesListContainer.innerHTML = `<div class="error-message">Please set a valid MOCK_USER_ID in the JavaScript to load milestones.</div>`;
+            }
+
+            // Set current date for date inputs
+            const today = new Date().toISOString().split('T')[0];
+            liftDateInput.value = today;
+            photoDateInput.value = today;
+            milestoneDateInput.value = today;
+        });
+    </script>
+</body>
+</html>
