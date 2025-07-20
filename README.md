@@ -122,9 +122,3 @@ Frontend:
     
       dotenv: Manages environment variables for configuration.
 
-Backend:
-    
-      .NET
-      EF Core
-      SQLite
-
