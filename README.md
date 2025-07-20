@@ -121,3 +121,4 @@ Frontend:
       CORS (cors middleware): Enables secure communication between your frontend and backend running on different ports.
     
       dotenv: Manages environment variables for configuration.
+
